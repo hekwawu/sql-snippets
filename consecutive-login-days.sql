@@ -2,6 +2,14 @@
 -- Business cases:
 	-- Tracking consecutive visitors to your site
 	-- Can be tweaked to show number of logins within x amount of days
+	
+-- Schema:
+	player_id INT,
+	device_id INT,
+	event_date DATE,
+	games_played INT
+	
+-- Primary Key = player_id, event_date
 
 -- Set up (optional):
 
@@ -13,20 +21,13 @@ insert into Activity (player_id, device_id, event_date, games_played) values ('2
 insert into Activity (player_id, device_id, event_date, games_played) values ('3', '1', '2016-03-02', '0');
 insert into Activity (player_id, device_id, event_date, games_played) values ('3', '4', '2018-07-03', '5');
 
--- PK = player_id, event_date
-
--- POSTGRES doesn't have DESC TABLE, so see below for how you can review
-select * 
-from activity
-limit 3;
-
 -- Make table with all relevant dates
 with days as (
 	select
 		player_id,
 		event_date,
 		-- consecutive date
-		date(event_date + interval '1 day') as con_date,
+		date(event_date + interval '1 day') as consec_date,
 		-- next recorded date
 		lead(event_date) over (partition by player_id
 			order by event_date) as next_date,
@@ -43,7 +44,7 @@ select
 		(select
 		count(distinct player_id)
 		from days
-		where next_date = con_date
+		where next_date = consec_date
 			and logins = 1
 	)::numeric /
 	-- Count total numer of players
@@ -61,7 +62,7 @@ with days as (
 		player_id,
 		event_date,
 		-- Consecutive data
-		date(event_date + interval '1 day') as con_date,
+		date(event_date + interval '1 day') as consec_date,
 		-- Next recorded date
 		LEAD(event_date) over (partition by player_id
 			order by event_date) as next_date
@@ -74,14 +75,16 @@ select
 	(select
 		COUNT(distinct player_id)
 	from days
-	where rec_date = con_date) as qual_plays,
+	where next_date = consec_date) as qual_plays,
 	count(distinct player_id) as all_plays
 from days)
 
 
 -- Execute division
 select
-	round(qual_plays::numeric/all_plays::numeric,2) as fraction
+	round(
+		qual_plays::numeric/
+		all_plays::numeric,2) as fraction
 from totals;
 
 
