@@ -1,5 +1,7 @@
--- This script is great for calculating any type of QoQ, MoM, WoW etc change
--- Could easily have metrics added to make a whole table of trended metrics
+-- Problem: Calculate MoM percentage change in revenue, rounded to the 2nd decimal point
+-- Business Cases:
+	-- Pretty much all businesses needed some type of Wow, MoM, QoQ analysis
+	-- Script can easily be adjusted to have metrics added to make a whole table of trended metrics
 
 -- Table schema is as follows (no code provided):
 	id INT
